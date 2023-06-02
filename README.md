@@ -1,2 +1,3 @@
 # SystemExtensionKit
-macOS platform utils for SystemExtension  
+
+A description of this package.
