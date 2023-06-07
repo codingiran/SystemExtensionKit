@@ -51,14 +51,13 @@ if #available(macOS 12.0, *) {
     } else {
         debugPrint("SystemExtension is not enabled")
     }
-    return !enable
 }
 
 // Active SystemExtension
 do {
     try await SystemExtension.activeSystemExtension()
 } catch {
-		// Handle error
+    // Handle error
     debugPrint(error.localizedDescription)
 }
 
