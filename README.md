@@ -43,7 +43,7 @@ import SystemExtensionKit
 
 ...
 
-// check SystemExtension Status
+// Check SystemExtension status
 if #available(macOS 12.0, *) {
     let enable = await SystemExtension.checkSystemExtensionEnableStatus()
     if enable {
