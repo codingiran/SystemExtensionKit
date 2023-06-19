@@ -27,4 +27,5 @@ let package = Package(
         .testTarget(
             name: "SystemExtensionKitTests",
             dependencies: ["SystemExtensionKit"]),
-    ])
+    ],
+    swiftLanguageVersions: [.v5])
