@@ -7,6 +7,14 @@
 
 import SystemExtensions
 
+// Enforce minimum Swift version for all platforms and build systems.
+#if swift(<5.5)
+#error("SystemExtensionKit doesn't support Swift versions below 5.5.")
+#endif
+
+/// Current SystemExtensionKit version. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
+let version = "1.0.0"
+
 public let SystemExtension = SystemExtensionKit.shared
 
 public protocol SystemExtensionDelegate: NSObjectProtocol {
