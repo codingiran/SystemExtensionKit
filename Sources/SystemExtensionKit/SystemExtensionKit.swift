@@ -12,8 +12,8 @@ import SystemExtensions
 #error("SystemExtensionKit doesn't support Swift versions below 5.5.")
 #endif
 
-/// Current SystemExtensionKit version 1.1.3. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
-public let version = "1.1.3"
+/// Current SystemExtensionKit version 1.1.4. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
+public let version = "1.1.4"
 
 public let SystemExtension = SystemExtensionKit.shared
 
@@ -57,6 +57,49 @@ public class SystemExtensionKit: NSObject {
         case cancelExtension(OSSystemExtensionRequest, String, String)
     }
 
+    public enum ExtensionStatus {
+        case unknown
+        case notInstalled
+        case waitingApproval(OSSystemExtensionProperties)
+        case installed(OSSystemExtensionProperties)
+
+        public var isUnknown: Bool {
+            switch self {
+            case .unknown:
+                return true
+            default:
+                return false
+            }
+        }
+
+        public var isNotInstalled: Bool {
+            switch self {
+            case .notInstalled:
+                return true
+            default:
+                return false
+            }
+        }
+
+        public var isWaitingApproval: Bool {
+            switch self {
+            case .waitingApproval:
+                return true
+            default:
+                return false
+            }
+        }
+
+        public var isInstalled: Bool {
+            switch self {
+            case .installed:
+                return true
+            default:
+                return false
+            }
+        }
+    }
+
     public static let shared = SystemExtensionKit()
     override private init() {}
 
@@ -98,12 +141,17 @@ public class SystemExtensionKit: NSObject {
         }
     }
 
-    @available(macOS 12.0, *)
-    public func checkSystemExtensionEnableStatus() async -> Bool {
-        if let property = try? await enabledSystemExtensionProperty() {
-            return !property.isAwaitingUserApproval && !property.isUninstalling
+    public func checkSystemExtensionStatus() async -> SystemExtensionKit.ExtensionStatus {
+        if #available(macOS 12.0, *) {
+            if let property = try? await enabledSystemExtensionProperty() {
+                if property.isAwaitingUserApproval { return .waitingApproval(property) }
+                if property.isUninstalling { return .notInstalled }
+                return .installed(property)
+            } else {
+                return .notInstalled
+            }
         } else {
-            return false
+            return .unknown
         }
     }
 
