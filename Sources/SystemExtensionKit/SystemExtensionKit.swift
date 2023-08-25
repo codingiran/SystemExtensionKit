@@ -12,8 +12,8 @@ import SystemExtensions
 #error("SystemExtensionKit doesn't support Swift versions below 5.5.")
 #endif
 
-/// Current SystemExtensionKit version 1.1.2. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
-public let version = "1.1.2"
+/// Current SystemExtensionKit version 1.1.3. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
+public let version = "1.1.3"
 
 public let SystemExtension = SystemExtensionKit.shared
 
@@ -22,7 +22,7 @@ public protocol SystemExtensionDelegate: NSObjectProtocol {
 }
 
 public class SystemExtensionKit: NSObject {
-    public enum ExtensionError: LocalizedError {
+    public enum ExtensionError: Error {
         case extensionDirectoryFailed(String, Error)
         case extensionNotExist
         case extensionCreateURLFailed(String)
@@ -30,7 +30,7 @@ public class SystemExtensionKit: NSObject {
         case extensionRequestFailed(Error)
         case extensionNeedReboot
 
-        var localizedDescription: String? {
+        var localizedDescription: String {
             switch self {
             case .extensionDirectoryFailed(let urlStr, let error):
                 return "Failed to get the contents of \(urlStr): \(error.localizedDescription)"
@@ -41,9 +41,9 @@ public class SystemExtensionKit: NSObject {
             case .extensionBundleIdMissing(let urlStr):
                 return "Failed to get bundleIdentifier of system extensions bundle with URL: \(urlStr)"
             case .extensionRequestFailed(let error):
-                return "Failed to request authorization: \(error.localizedDescription)"
+                return "Failed to request extension: \(error.localizedDescription)"
             case .extensionNeedReboot:
-                return "Failed to request authorization: user need to reboot mac"
+                return "Failed to request extension: user need to reboot mac"
             }
         }
     }
@@ -217,5 +217,16 @@ public extension SystemExtensionKit {
             throw ExtensionError.extensionCreateURLFailed(extensionURL.absoluteString)
         }
         return extensionBundle
+    }
+}
+
+// MARK: - Error Convinience
+
+public extension Error {
+    var systemExtensionDescription: String {
+        guard let error = self as? SystemExtensionKit.ExtensionError else {
+            return localizedDescription
+        }
+        return error.localizedDescription
     }
 }
