@@ -12,8 +12,8 @@ import SystemExtensions
 #error("SystemExtensionKit doesn't support Swift versions below 5.5.")
 #endif
 
-/// Current SystemExtensionKit version 1.1.5. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
-public let version = "1.1.5"
+/// Current SystemExtensionKit version 1.1.6. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
+public let version = "1.1.6"
 
 public let SystemExtension = SystemExtensionKit.shared
 
@@ -255,7 +255,16 @@ extension SystemExtensionKit: OSSystemExtensionRequestDelegate {
         defer {
             propertiesContinuation = nil
         }
-        let enabledProperty = properties.first { $0.isEnabled }
+        var enabledProperty: OSSystemExtensionProperties?
+        for property in properties {
+            if property.isEnabled {
+                enabledProperty = property
+                break
+            }
+            if property.isAwaitingUserApproval {
+                enabledProperty = property
+            }
+        }
         propertiesContinuation?.resume(returning: enabledProperty)
     }
 }
