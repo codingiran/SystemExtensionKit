@@ -12,8 +12,8 @@ import SystemExtensions
 #error("SystemExtensionKit doesn't support Swift versions below 5.5.")
 #endif
 
-/// Current SystemExtensionKit version 1.1.1. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
-public let version = "1.1.1"
+/// Current SystemExtensionKit version 1.1.2. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
+public let version = "1.1.2"
 
 public let SystemExtension = SystemExtensionKit.shared
 
@@ -156,14 +156,6 @@ extension SystemExtensionKit: OSSystemExtensionRequestDelegate {
     }
 
     public func request(_ request: OSSystemExtensionRequest, actionForReplacingExtension existing: OSSystemExtensionProperties, withExtension extension: OSSystemExtensionProperties) -> OSSystemExtensionRequest.ReplacementAction {
-        if needForceUpdate {
-            return .replace
-        }
-        if #available(macOS 12.0, *) {
-            if existing.isAwaitingUserApproval {
-                return .replace
-            }
-        }
         // existing
         let existingBundleIdentifier = existing.bundleIdentifier
         let existingBundleVersion = existing.bundleVersion
@@ -173,6 +165,17 @@ extension SystemExtensionKit: OSSystemExtensionRequestDelegate {
         let extensionBundleIdentifier = `extension`.bundleIdentifier
         let extensionBundleVersion = `extension`.bundleVersion
         let extensionBundleShortVersion = `extension`.bundleShortVersion
+
+        if needForceUpdate {
+            delegate?.systemExtensionKit(self, requestResult: .replacingExtension(request, existingBundleShortVersion, extensionBundleShortVersion))
+            return .replace
+        }
+        if #available(macOS 12.0, *) {
+            if existing.isAwaitingUserApproval {
+                delegate?.systemExtensionKit(self, requestResult: .replacingExtension(request, existingBundleShortVersion, extensionBundleShortVersion))
+                return .replace
+            }
+        }
 
         guard existingBundleIdentifier == extensionBundleIdentifier,
               existingBundleVersion == extensionBundleVersion,
