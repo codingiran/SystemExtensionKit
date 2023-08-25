@@ -12,8 +12,8 @@ import SystemExtensions
 #error("SystemExtensionKit doesn't support Swift versions below 5.5.")
 #endif
 
-/// Current SystemExtensionKit version 1.1.4. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
-public let version = "1.1.4"
+/// Current SystemExtensionKit version 1.1.5. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
+public let version = "1.1.5"
 
 public let SystemExtension = SystemExtensionKit.shared
 
@@ -57,7 +57,7 @@ public class SystemExtensionKit: NSObject {
         case cancelExtension(OSSystemExtensionRequest, String, String)
     }
 
-    public enum ExtensionStatus {
+    public enum ExtensionStatus: CustomStringConvertible {
         case unknown
         case notInstalled
         case waitingApproval(OSSystemExtensionProperties)
@@ -96,6 +96,19 @@ public class SystemExtensionKit: NSObject {
                 return true
             default:
                 return false
+            }
+        }
+
+        public var description: String {
+            switch self {
+            case .unknown:
+                return "unknown"
+            case .notInstalled:
+                return "not installed"
+            case .waitingApproval:
+                return "waiting for userApproval"
+            case .installed:
+                return "installed"
             }
         }
     }
