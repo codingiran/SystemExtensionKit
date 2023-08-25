@@ -12,8 +12,8 @@ import SystemExtensions
 #error("SystemExtensionKit doesn't support Swift versions below 5.5.")
 #endif
 
-/// Current SystemExtensionKit version. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
-let version = "1.0.0"
+/// Current SystemExtensionKit version 1.1.0. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
+public let version = "1.1.0"
 
 public let SystemExtension = SystemExtensionKit.shared
 
@@ -54,9 +54,10 @@ public class SystemExtensionKit: NSObject {
         case failed(OSSystemExtensionRequest, Error)
         case needsUserApproval(OSSystemExtensionRequest)
         case replacingExtension(OSSystemExtensionRequest, String, String)
+        case cancelExtension(OSSystemExtensionRequest, String, String)
     }
 
-    static let shared = SystemExtensionKit()
+    public static let shared = SystemExtensionKit()
     override private init() {}
 
     public weak var delegate: SystemExtensionDelegate?
@@ -74,7 +75,10 @@ public class SystemExtensionKit: NSObject {
         return bundle
     }
 
-    public func activeSystemExtension() async throws {
+    private var needForceUpdate: Bool = false
+
+    public func activeSystemExtension(forceUpdate: Bool = false) async throws {
+        needForceUpdate = forceUpdate
         // 请求 SystemExtension 授权
         try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
             do {
@@ -96,8 +100,8 @@ public class SystemExtensionKit: NSObject {
 
     @available(macOS 12.0, *)
     public func checkSystemExtensionEnableStatus() async -> Bool {
-        if let _ = try? await enabledSystemExtensionProperty() {
-            return true
+        if let property = try? await enabledSystemExtensionProperty() {
+            return !property.isAwaitingUserApproval && !property.isUninstalling
         } else {
             return false
         }
@@ -152,10 +156,34 @@ extension SystemExtensionKit: OSSystemExtensionRequestDelegate {
     }
 
     public func request(_ request: OSSystemExtensionRequest, actionForReplacingExtension existing: OSSystemExtensionProperties, withExtension extension: OSSystemExtensionProperties) -> OSSystemExtensionRequest.ReplacementAction {
-        let existingVersion = existing.bundleShortVersion
-        let extensionVersion = `extension`.bundleShortVersion
-        delegate?.systemExtensionKit(self, requestResult: .replacingExtension(request, existingVersion, extensionVersion))
-        return .replace
+        if needForceUpdate {
+            return .replace
+        }
+        if #available(macOS 12.0, *) {
+            if existing.isAwaitingUserApproval {
+                return .replace
+            }
+        }
+        // existing
+        let existingBundleIdentifier = existing.bundleIdentifier
+        let existingBundleVersion = existing.bundleVersion
+        let existingBundleShortVersion = existing.bundleShortVersion
+
+        // `extension`
+        let extensionBundleIdentifier = `extension`.bundleIdentifier
+        let extensionBundleVersion = `extension`.bundleVersion
+        let extensionBundleShortVersion = `extension`.bundleShortVersion
+
+        guard existingBundleIdentifier == extensionBundleIdentifier,
+              existingBundleVersion == extensionBundleVersion,
+              existingBundleShortVersion == extensionBundleShortVersion
+        else {
+            delegate?.systemExtensionKit(self, requestResult: .replacingExtension(request, existingBundleShortVersion, extensionBundleShortVersion))
+            return .replace
+        }
+
+        delegate?.systemExtensionKit(self, requestResult: .replacingExtension(request, existingBundleShortVersion, extensionBundleShortVersion))
+        return .cancel
     }
 
     @available(macOS 12.0, *)
