@@ -12,8 +12,8 @@ import SystemExtensions
 #error("SystemExtensionKit doesn't support Swift versions below 5.5.")
 #endif
 
-/// Current SystemExtensionKit version 1.1.0. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
-public let version = "1.1.0"
+/// Current SystemExtensionKit version 1.1.1. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
+public let version = "1.1.1"
 
 public let SystemExtension = SystemExtensionKit.shared
 
@@ -182,7 +182,7 @@ extension SystemExtensionKit: OSSystemExtensionRequestDelegate {
             return .replace
         }
 
-        delegate?.systemExtensionKit(self, requestResult: .replacingExtension(request, existingBundleShortVersion, extensionBundleShortVersion))
+        delegate?.systemExtensionKit(self, requestResult: .cancelExtension(request, existingBundleShortVersion, extensionBundleShortVersion))
         return .cancel
     }
 
