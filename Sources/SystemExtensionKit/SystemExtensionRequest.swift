@@ -47,7 +47,7 @@ public class SystemExtensionRequest: NSObject {
 
     deinit {
         continuation = nil
-        if #available(macOS 11.0, *) { os_log("Deinit request for \(self.request.identifier)") }
+        if #available(macOS 11.0, *) { os_log("Deinit SystemExtension request for %{public}s", self.request.identifier) }
     }
 
     @discardableResult
@@ -58,6 +58,7 @@ public class SystemExtensionRequest: NSObject {
             self.continuation = nil
             self.request.delegate = self
             OSSystemExtensionManager.shared.submitRequest(self.request)
+            if #available(macOS 11.0, *) { os_log("submit SystemExtension request for %{public}s", self.request.identifier) }
             self.continuation = cont
         }
     }
@@ -148,11 +149,11 @@ public extension SystemExtensionRequest {
         case deactivate
         @available(macOS 12.0, *)
         case properties
-        
+
         public var description: String {
             switch self {
             case .activate(let forceUpdate):
-                return forceUpdate ? "activation with forceupdate" : "activation"
+                return forceUpdate ? "activation(forceupdate)" : "activation"
             case .deactivate:
                 return "deactivation"
             case .properties:
