@@ -143,11 +143,22 @@ extension SystemExtensionRequest: OSSystemExtensionRequestDelegate {
 }
 
 public extension SystemExtensionRequest {
-    enum Action {
+    enum Action: CustomStringConvertible {
         case activate(forceUpdate: Bool)
         case deactivate
         @available(macOS 12.0, *)
         case properties
+        
+        public var description: String {
+            switch self {
+            case .activate(let forceUpdate):
+                return forceUpdate ? "activation with forceupdate" : "activation"
+            case .deactivate:
+                return "deactivation"
+            case .properties:
+                return "properties"
+            }
+        }
     }
 
     struct Result {
