@@ -9,9 +9,9 @@ import os.log
 import SystemExtensions
 
 public class SystemExtensionRequest: NSObject {
-    let action: SystemExtensionRequest.Action
-    let bundleIdentifier: String
-    let request: OSSystemExtensionRequest
+    public let action: SystemExtensionRequest.Action
+    public let bundleIdentifier: String
+    public let request: OSSystemExtensionRequest
 
     private var continuation: CheckedContinuation<SystemExtensionRequest.Result, Error>?
 
