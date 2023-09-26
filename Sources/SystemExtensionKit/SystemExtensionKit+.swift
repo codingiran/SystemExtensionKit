@@ -28,7 +28,13 @@ public extension SystemExtensionKit {
             case .extensionBundleIdMissing(let urlStr):
                 return "Failed to get bundleIdentifier of system extensions bundle with URL: \(urlStr)"
             case .extensionRequestFailed(let error):
-                return "Failed to request extension: \(error.localizedDescription)"
+                let errorDescription: String
+                if let error = error as? OSSystemExtensionError {
+                    errorDescription = error.code.description
+                } else {
+                    errorDescription = error.localizedDescription
+                }
+                return "Failed to request extension: \(errorDescription)"
             case .extensionNeedReboot:
                 return "Failed to request extension: user need to reboot mac"
             case .extensionSystemUnsupport:
@@ -112,6 +118,43 @@ public extension SystemExtensionKit {
             throw ExtensionError.extensionCreateURLFailed(extensionURL.absoluteString)
         }
         return extensionBundle
+    }
+}
+
+// MARK: - OSSystemExtensionError Code Description
+
+extension OSSystemExtensionError.Code: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .unknown:
+            return "unknown"
+        case .missingEntitlement:
+            return "Missing Entitlement"
+        case .unsupportedParentBundleLocation:
+            return "Unsupported Parent Bundle Location"
+        case .extensionNotFound:
+            return "Extension Not found"
+        case .extensionMissingIdentifier:
+            return "Extension Missing Identifier"
+        case .duplicateExtensionIdentifer:
+            return "Duplicate Extension Identifier"
+        case .unknownExtensionCategory:
+            return "Unknown Extension Category"
+        case .codeSignatureInvalid:
+            return "Code Signature Invalid"
+        case .validationFailed:
+            return "Validation Failed"
+        case .forbiddenBySystemPolicy:
+            return "Forbidden by System Policy"
+        case .requestCanceled:
+            return "Request Cancelled"
+        case .requestSuperseded:
+            return "Request Superceeded"
+        case .authorizationRequired:
+            return "Authorization Required"
+        @unknown default:
+            return "unknown"
+        }
     }
 }
 
