@@ -124,8 +124,9 @@ extension SystemExtensionRequest: OSSystemExtensionRequestDelegate {
 
     public func request(_ request: OSSystemExtensionRequest, didFailWithError error: Error) {
         defer { continuation = nil }
-        requestUpdater?.systemExtensionRequest(self, updateProgress: .failed(error))
-        continuation?.resume(throwing: SystemExtensionKit.ExtensionError.extensionRequestFailed(error))
+        let extensionError = SystemExtensionKit.ExtensionError.extensionRequestFailed(error)
+        requestUpdater?.systemExtensionRequest(self, updateProgress: .failed(extensionError))
+        continuation?.resume(throwing: extensionError)
     }
 
     @available(macOS 12.0, *)
