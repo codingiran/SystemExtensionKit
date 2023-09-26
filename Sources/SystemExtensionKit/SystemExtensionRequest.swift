@@ -72,20 +72,22 @@ extension SystemExtensionRequest: OSSystemExtensionRequestDelegate {
             let existingBundleIdentifier = existing.bundleIdentifier
             let existingBundleVersion = existing.bundleVersion
             let existingBundleShortVersion = existing.bundleShortVersion
+            let existingVersion = existingBundleShortVersion + "(\(existingBundleVersion))"
 
             // ext
             let extBundleIdentifier = ext.bundleIdentifier
             let extBundleVersion = ext.bundleVersion
             let extBundleShortVersion = ext.bundleShortVersion
+            let extVersion = extBundleShortVersion + "(\(extBundleVersion))"
 
             if forceUpdate {
-                requestUpdater?.systemExtensionRequest(self, updateProgress: .replacingExtension(existingVersion: existingBundleShortVersion, extVersion: extBundleShortVersion))
+                updatingReplacingExtension(existingVersion: existingVersion, extVersion: extVersion)
                 return .replace
             }
 
             if #available(macOS 12.0, *) {
                 if existing.isAwaitingUserApproval {
-                    requestUpdater?.systemExtensionRequest(self, updateProgress: .replacingExtension(existingVersion: existingBundleShortVersion, extVersion: extBundleShortVersion))
+                    updatingReplacingExtension(existingVersion: existingVersion, extVersion: extVersion)
                     return .replace
                 }
             }
@@ -94,11 +96,11 @@ extension SystemExtensionRequest: OSSystemExtensionRequestDelegate {
                   existingBundleVersion == extBundleVersion,
                   existingBundleShortVersion == extBundleShortVersion
             else {
-                requestUpdater?.systemExtensionRequest(self, updateProgress: .replacingExtension(existingVersion: existingBundleShortVersion, extVersion: extBundleShortVersion))
+                updatingReplacingExtension(existingVersion: existingVersion, extVersion: extVersion)
                 return .replace
             }
 
-            requestUpdater?.systemExtensionRequest(self, updateProgress: .cancelExtension(existingVersion: existingBundleShortVersion, extVersion: extBundleShortVersion))
+            updatingCancelExtension(existingVersion: existingVersion, extVersion: extVersion)
             return .cancel
         default:
             return .cancel
@@ -140,6 +142,18 @@ extension SystemExtensionRequest: OSSystemExtensionRequestDelegate {
             }
         }
         continuation?.resume(returning: .init(enabledProperty: enabledProperty))
+    }
+}
+
+// MARK: - SystemExtensionRequestUpdating callback
+
+private extension SystemExtensionRequest {
+    private func updatingReplacingExtension(existingVersion: String, extVersion: String) {
+        requestUpdater?.systemExtensionRequest(self, updateProgress: .replacingExtension(existingVersion: existingVersion, extVersion: extVersion))
+    }
+
+    private func updatingCancelExtension(existingVersion: String, extVersion: String) {
+        requestUpdater?.systemExtensionRequest(self, updateProgress: .cancelExtension(existingVersion: existingVersion, extVersion: extVersion))
     }
 }
 
