@@ -21,7 +21,8 @@ let package = Package(
         .target(
             name: "SystemExtensionKit",
             dependencies: [],
-            path: "Sources"),
+            path: "Sources",
+            resources: [.copy("Resources/PrivacyInfo.xcprivacy")]),
         .testTarget(
             name: "SystemExtensionKitTests",
             dependencies: ["SystemExtensionKit"]),
