@@ -12,7 +12,8 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "SystemExtensionKit",
-            targets: ["SystemExtensionKit"]),
+            targets: ["SystemExtensionKit"]
+        ),
     ],
     dependencies: [],
     targets: [
@@ -22,9 +23,13 @@ let package = Package(
             name: "SystemExtensionKit",
             dependencies: [],
             path: "Sources",
-            resources: [.copy("Resources/PrivacyInfo.xcprivacy")]),
+            resources: [.copy("Resources/PrivacyInfo.xcprivacy")],
+            swiftSettings: [.define("INCLUDE_SYSTEM_EXTENSIONS_KIT")]
+        ),
         .testTarget(
             name: "SystemExtensionKitTests",
-            dependencies: ["SystemExtensionKit"]),
+            dependencies: ["SystemExtensionKit"]
+        ),
     ],
-    swiftLanguageVersions: [.v5])
+    swiftLanguageVersions: [.v5]
+)
