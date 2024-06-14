@@ -12,8 +12,8 @@ import SystemExtensions
 #error("SystemExtensionKit doesn't support Swift versions below 5.5.")
 #endif
 
-/// Current SystemExtensionKit version 2.0.4. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
-public let version = "2.0.4"
+/// Current SystemExtensionKit version 2.0.5. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
+public let version = "2.0.5"
 
 public let SystemExtension = SystemExtensionKit.shared
 
