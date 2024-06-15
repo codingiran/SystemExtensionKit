@@ -122,18 +122,6 @@ public extension SystemExtensionKit {
     }
 }
 
-public extension Bundle {
-    var extensionMachServiceName: String? {
-        guard
-            let networkExtensionKeys = object(forInfoDictionaryKey: "NetworkExtension") as? [String: Any],
-            let machServiceName = networkExtensionKeys["NEMachServiceName"] as? String
-        else {
-            return nil
-        }
-        return machServiceName
-    }
-}
-
 // MARK: - OSSystemExtensionError Code Description
 
 extension OSSystemExtensionError.Code: CustomStringConvertible {
