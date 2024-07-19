@@ -9,7 +9,7 @@ import Foundation
 import SystemExtensions
 
 public extension SystemExtensionKit {
-    enum ExtensionError: Error {
+    enum ExtensionError: LocalizedError {
         case extensionDirectoryFailed(String, Error)
         case extensionNotExist
         case extensionCreateURLFailed(String)
@@ -18,7 +18,7 @@ public extension SystemExtensionKit {
         case extensionNeedReboot
         case extensionSystemUnsupport
 
-        var localizedDescription: String {
+        public var errorDescription: String? {
             switch self {
             case .extensionDirectoryFailed(let urlStr, let error):
                 return "Failed to get the contents of \(urlStr): \(error.localizedDescription)"
@@ -156,16 +156,5 @@ extension OSSystemExtensionError.Code: CustomStringConvertible {
         @unknown default:
             return "unknown"
         }
-    }
-}
-
-// MARK: - Error Convinience
-
-public extension Error {
-    var systemExtensionDescription: String {
-        guard let error = self as? SystemExtensionKit.ExtensionError else {
-            return localizedDescription
-        }
-        return error.localizedDescription
     }
 }
