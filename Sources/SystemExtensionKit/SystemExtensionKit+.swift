@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SystemExtensions
+@preconcurrency import SystemExtensions
 
 public extension SystemExtensionKit {
     enum ExtensionError: LocalizedError {
@@ -44,7 +44,7 @@ public extension SystemExtensionKit {
         }
     }
 
-    enum ExtensionStatus: CustomStringConvertible {
+    enum ExtensionStatus: Sendable, CustomStringConvertible {
         case unknown
         case notInstalled
         case waitingApproval(OSSystemExtensionProperties)
@@ -124,7 +124,7 @@ public extension SystemExtensionKit {
 
 // MARK: - OSSystemExtensionError Code Description
 
-extension OSSystemExtensionError.Code: CustomStringConvertible {
+extension OSSystemExtensionError.Code: @retroactive CustomStringConvertible {
     public var description: String {
         switch self {
         case .unknown:

@@ -24,7 +24,10 @@ let package = Package(
             dependencies: [],
             path: "Sources",
             resources: [.copy("Resources/PrivacyInfo.xcprivacy")],
-            swiftSettings: [.define("INCLUDE_SYSTEM_EXTENSIONS_KIT")]
+            swiftSettings: [.define("INCLUDE_SYSTEM_EXTENSIONS_KIT")],
+            linkerSettings: [
+                .linkedFramework("SystemExtensions"),
+            ]
         ),
         .testTarget(
             name: "SystemExtensionKitTests",

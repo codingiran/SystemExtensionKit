@@ -6,9 +6,9 @@
 //
 
 import os.log
-import SystemExtensions
+@preconcurrency import SystemExtensions
 
-public class SystemExtensionRequest: NSObject {
+public class SystemExtensionRequest: NSObject, @unchecked Sendable {
     public let action: SystemExtensionRequest.Action
     public let bundleIdentifier: String
     public let request: OSSystemExtensionRequest
@@ -159,7 +159,7 @@ private extension SystemExtensionRequest {
 }
 
 public extension SystemExtensionRequest {
-    enum Action: CustomStringConvertible {
+    enum Action: Sendable, CustomStringConvertible {
         case activate(forceUpdate: Bool)
         case deactivate
         @available(macOS 12.0, *)
@@ -177,11 +177,11 @@ public extension SystemExtensionRequest {
         }
     }
 
-    struct Result {
+    struct Result: Sendable {
         let enabledProperty: OSSystemExtensionProperties?
     }
 
-    enum Progress {
+    enum Progress: Sendable {
         case submitting
         case needsUserApproval
         case completed
