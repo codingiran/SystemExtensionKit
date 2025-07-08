@@ -5,25 +5,26 @@
 //  Created by CodingIran on 2023/2/9.
 //
 
-@preconcurrency import SystemExtensions
+import SystemExtensions
 
 // Enforce minimum Swift version for all platforms and build systems.
-#if swift(<5.5)
-#error("SystemExtensionKit doesn't support Swift versions below 5.5.")
+#if swift(<5.10)
+    #error("SystemExtensionKit doesn't support Swift versions below 5.10.")
 #endif
 
-/// Current SystemExtensionKit version 2.0.8. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
-public let version = "2.0.8"
+/// Current SystemExtensionKit version 2.1.0. Necessary since SPM doesn't use dynamic libraries. Plus this will be more accurate.
+public let version = "2.1.0"
 
 public let SystemExtension = SystemExtensionKit.shared
 
-public protocol SystemExtensionRequestUpdating: NSObjectProtocol {
+public protocol SystemExtensionRequestUpdating: AnyObject, Sendable {
     func systemExtensionRequest(_ request: SystemExtensionRequest, updateProgress progress: SystemExtensionRequest.Progress)
 }
 
-public class SystemExtensionKit: NSObject, @unchecked Sendable {
+public final class SystemExtensionKit: @unchecked Sendable {
     public static let shared = SystemExtensionKit()
-    override private init() {}
+
+    private init() {}
 
     static let requestQueue = DispatchQueue(label: "com.systemExtensionkit.request.queue")
 

@@ -9,7 +9,7 @@ import Foundation
 @preconcurrency import SystemExtensions
 
 public extension SystemExtensionKit {
-    enum ExtensionError: LocalizedError {
+    enum ExtensionError: LocalizedError, Sendable {
         case extensionDirectoryFailed(String, Error)
         case extensionNotExist
         case extensionCreateURLFailed(String)
@@ -20,15 +20,15 @@ public extension SystemExtensionKit {
 
         public var errorDescription: String? {
             switch self {
-            case .extensionDirectoryFailed(let urlStr, let error):
+            case let .extensionDirectoryFailed(urlStr, error):
                 return "Failed to get the contents of \(urlStr): \(error.localizedDescription)"
             case .extensionNotExist:
                 return "Failed to find any system extensions"
-            case .extensionCreateURLFailed(let urlStr):
+            case let .extensionCreateURLFailed(urlStr):
                 return "Failed to create a bundle with URL: \(urlStr)"
-            case .extensionBundleIdMissing(let urlStr):
+            case let .extensionBundleIdMissing(urlStr):
                 return "Failed to get bundleIdentifier of system extensions bundle with URL: \(urlStr)"
-            case .extensionRequestFailed(let error):
+            case let .extensionRequestFailed(error):
                 let errorDescription: String
                 if let error = error as? OSSystemExtensionError {
                     errorDescription = error.code.description

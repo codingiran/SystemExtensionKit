@@ -5,7 +5,9 @@
 //  Created by CodingIran on 2023/9/25.
 //
 
-import os.log
+#if DEBUG
+    import os.log
+#endif
 @preconcurrency import SystemExtensions
 
 public class SystemExtensionRequest: NSObject, @unchecked Sendable {
@@ -24,7 +26,7 @@ public class SystemExtensionRequest: NSObject, @unchecked Sendable {
         super.init()
     }
 
-    convenience init(action: SystemExtensionRequest.Action, queue: dispatch_queue_t) throws {
+    convenience init(action: SystemExtensionRequest.Action, queue: DispatchQueue) throws {
         let extBundle = try SystemExtensionKit.getExtensionBundle()
         guard let bundleIdentifier = extBundle.bundleIdentifier else {
             throw SystemExtensionKit.ExtensionError.extensionBundleIdMissing(extBundle.bundleURL.absoluteString)
@@ -47,7 +49,9 @@ public class SystemExtensionRequest: NSObject, @unchecked Sendable {
 
     deinit {
         continuation = nil
-        if #available(macOS 11.0, *) { os_log("Deinit SystemExtension request for %{public}s", self.request.identifier) }
+        #if DEBUG
+            if #available(macOS 11.0, *) { os_log("Deinit SystemExtension request for %{public}s", self.request.identifier) }
+        #endif
     }
 
     @discardableResult
@@ -58,16 +62,18 @@ public class SystemExtensionRequest: NSObject, @unchecked Sendable {
             self.continuation = nil
             self.request.delegate = self
             OSSystemExtensionManager.shared.submitRequest(self.request)
-            if #available(macOS 11.0, *) { os_log("submit SystemExtension request for %{public}s", self.request.identifier) }
+            #if DEBUG
+                if #available(macOS 11.0, *) { os_log("submit SystemExtension request for %{public}s", self.request.identifier) }
+            #endif
             self.continuation = cont
         }
     }
 }
 
 extension SystemExtensionRequest: OSSystemExtensionRequestDelegate {
-    public func request(_ request: OSSystemExtensionRequest, actionForReplacingExtension existing: OSSystemExtensionProperties, withExtension ext: OSSystemExtensionProperties) -> OSSystemExtensionRequest.ReplacementAction {
+    public func request(_: OSSystemExtensionRequest, actionForReplacingExtension existing: OSSystemExtensionProperties, withExtension ext: OSSystemExtensionProperties) -> OSSystemExtensionRequest.ReplacementAction {
         switch action {
-        case .activate(let forceUpdate):
+        case let .activate(forceUpdate):
             // existing
             let existingBundleIdentifier = existing.bundleIdentifier
             let existingBundleVersion = existing.bundleVersion
@@ -107,11 +113,11 @@ extension SystemExtensionRequest: OSSystemExtensionRequestDelegate {
         }
     }
 
-    public func requestNeedsUserApproval(_ request: OSSystemExtensionRequest) {
+    public func requestNeedsUserApproval(_: OSSystemExtensionRequest) {
         requestUpdater?.systemExtensionRequest(self, updateProgress: .needsUserApproval)
     }
 
-    public func request(_ request: OSSystemExtensionRequest, didFinishWithResult result: OSSystemExtensionRequest.Result) {
+    public func request(_: OSSystemExtensionRequest, didFinishWithResult result: OSSystemExtensionRequest.Result) {
         defer { continuation = nil }
         guard result == .completed else {
             requestUpdater?.systemExtensionRequest(self, updateProgress: .willCompleteAfterReboot)
@@ -122,7 +128,7 @@ extension SystemExtensionRequest: OSSystemExtensionRequestDelegate {
         continuation?.resume(returning: .init(enabledProperty: nil))
     }
 
-    public func request(_ request: OSSystemExtensionRequest, didFailWithError error: Error) {
+    public func request(_: OSSystemExtensionRequest, didFailWithError error: Error) {
         defer { continuation = nil }
         let extensionError = SystemExtensionKit.ExtensionError.extensionRequestFailed(error)
         requestUpdater?.systemExtensionRequest(self, updateProgress: .failed(extensionError))
@@ -130,7 +136,7 @@ extension SystemExtensionRequest: OSSystemExtensionRequestDelegate {
     }
 
     @available(macOS 12.0, *)
-    public func request(_ request: OSSystemExtensionRequest, foundProperties properties: [OSSystemExtensionProperties]) {
+    public func request(_: OSSystemExtensionRequest, foundProperties properties: [OSSystemExtensionProperties]) {
         defer { continuation = nil }
         var enabledProperty: OSSystemExtensionProperties?
         for property in properties {
@@ -167,7 +173,7 @@ public extension SystemExtensionRequest {
 
         public var description: String {
             switch self {
-            case .activate(let forceUpdate):
+            case let .activate(forceUpdate):
                 return forceUpdate ? "activation(forceupdate)" : "activation"
             case .deactivate:
                 return "deactivation"
