@@ -124,7 +124,13 @@ public extension SystemExtensionKit {
 
 // MARK: - OSSystemExtensionError Code Description
 
-extension OSSystemExtensionError.Code: @retroactive CustomStringConvertible {
+#if compiler(>=6.0)
+extension OSSystemExtensionError.Code: @retroactive CustomStringConvertible {}
+#else
+extension OSSystemExtensionError.Code: CustomStringConvertible {}
+#endif
+
+extension OSSystemExtensionError.Code {
     public var description: String {
         switch self {
         case .unknown:

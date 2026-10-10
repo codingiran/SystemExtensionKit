@@ -29,7 +29,9 @@ A modern Swift wrapper for Apple's [SystemExtensions framework](https://develope
 
 - macOS 10.15+
 - Swift 5.10+
-- Xcode 14.0+
+- Xcode 15.3+ for Swift 5.10; a matching Xcode/SDK for newer toolchains
+
+Swift 5.10 selects `Package@swift-5.10.swift` and Swift 5 language mode; Swift 6 toolchains select `Package.swift` and Swift 6 language mode. Protocol conformances conditionally use `@retroactive`, keeping the sources readable by both compilers. This compatibility revision must be included in a published release before remote consumers can use it.
 
 ## Installation
 
